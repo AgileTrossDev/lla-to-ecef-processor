@@ -41,6 +41,7 @@
     "iomanip": "cpp",
     "limits": "cpp",
     "sstream": "cpp",
-    "typeinfo": "cpp"
+    "typeinfo": "cpp",
+    "cinttypes": "cpp"
   }
 }

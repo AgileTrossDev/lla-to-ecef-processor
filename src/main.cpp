@@ -1,9 +1,9 @@
 
 
 #include <iostream>
-#include "csv_ingestion.h"
-#include "lla.h"
 
+#include "csv_ingestion.h"
+#include "ecef.h"
 
 using std::cout;
 using std::endl;
@@ -12,7 +12,7 @@ using std::endl;
 int main (void) {
   cout << "START" << endl;
 
-  auto res = ingest<Lla>("/home/sjackson/Development/project_x/test/big_test_case.csv");
+  auto res = ingest<Ecef>("/home/sjackson/Development/project_x/test/big_test_case.csv");
 
   cout <<"R: " << res.size() << endl;
   res[0].disp();
@@ -23,12 +23,7 @@ int main (void) {
     instance.disp();
     
   }
-cout << cnt;
-
-
-
-
-
+  cout << cnt;
 
   cout << "EXITING" << endl;
 

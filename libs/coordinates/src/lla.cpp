@@ -14,7 +14,9 @@ using std::setprecision;
 
 // Displays a Record
 void Lla::disp() {
-   cout <<  setprecision(17) << "Lla: " << time << " "<<  setprecision(100) << x << " " << y << " " <<  z << " " << endl;
+   cout <<  setprecision(17) << "Lla: " << time << " "
+    <<  setprecision(100) << latitude << " "
+    << longitude << " " <<  altitude << " " << endl;
 }
 
 // Parses the line into a time stamp and 3 distinct Floats and builds a new Lla.    
@@ -30,11 +32,11 @@ Lla Lla::build_from_string(string line) {
       case 0:
         new_record.time = atof(string_val.c_str());
       case 1:
-        new_record.x = atof(string_val.c_str());
+        new_record.latitude = atof(string_val.c_str());
       case 2:
-        new_record.y = atof(string_val.c_str());
+        new_record.longitude = atof(string_val.c_str());
       case 3:
-        new_record.z = atof(string_val.c_str());
+        new_record.altitude = atof(string_val.c_str());
     }
     index +=1;
   }
