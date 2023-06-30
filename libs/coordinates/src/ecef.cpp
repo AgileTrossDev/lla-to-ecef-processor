@@ -32,11 +32,19 @@ const double Ecef::WGS84_E = 0.08181919084262149;   // first eccentricity --> Ma
 const double Ecef::PI = 3.141592653589793238;
 
 // Displays an ECEF Record to stdout
-void Ecef::disp() {
-   cout <<  setprecision(17) << "Ecef: " << time << " "
-    <<  setprecision(100) << x << " "
-    << y << " " <<  z << " " << endl;
+void Ecef::disp() const {
+   cout << "Ecef Record" << setprecision(17) << " Time: " << time <<  setprecision(100)
+    << " X: " << x 
+    << " Y:" <<  y 
+    << " Z:" <<  z 
+    << " VelX: " << velocity_x 
+    << " VelY: " << velocity_y 
+    << " VelZ: " << velocity_z 
+    << endl;
 }
+
+// Compares the Time between two ECEF Points
+bool Ecef::compare_by_time(const Ecef& a, const Ecef& b) { return a.time < b.time; }
 
 // Parses a string containing a CSV record of a timp stamped LLA coordinates and builds an Ecef instance
 // 
@@ -77,30 +85,121 @@ Ecef Ecef::build_from_lla(double time, double latitude, double longitude, double
   double y = (N + altitude) * cos_lat * sin_long;
   double z = (N * (1.0 - WGS84_E * WGS84_E) + altitude) * sin_lat;
 
-
   // Build ECEF Object
-  cout << setprecision(100) << x << " " << y << " " << z << endl;
+  //cout << setprecision(100) << x << " " << y << " " << z << endl;
   Ecef ret_val(time,x,y,z);
 
   return ret_val;
 
 }
 
+// Converts the input (Degrees) to Radians
 double Ecef::convert_degrees_to_radians(double input) {
   double DEGREES_TO_RADIANS = PI / 180.0;
   return input * DEGREES_TO_RADIANS;
 }
 
-ECEFVelocity Ecef::calculateECEFVelocity(const Ecef& point1, const Ecef& point2 ) {
+void Ecef::calculate_the_velocity(const Ecef& point1, Ecef& point2 ) {
 
-  double timeDifference = point2.get_time() - point1.get_time();
-  ECEFVelocity velocity;
-  velocity.vx = (point2.get_x() - point1.get_x()) / timeDifference;
-  velocity.vy = (point2.get_y() - point1.get_y()) / timeDifference;
-  velocity.vz = (point2.get_z() - point1.get_z()) / timeDifference;
+  double time_difference = point2.get_time() - point1.get_time();
+  
+  point2.set_vx( (point2.get_x() - point1.get_x()) / time_difference);
+  point2.set_vy((point2.get_y() - point1.get_y()) / time_difference);
+  point2.set_vz((point2.get_z() - point1.get_z()) / time_difference);
 
-  return velocity;
+  
 }
+
+// Perform linear interpolation leading up to the requested time from the previous point within positions
+Ecef Ecef::linear_interpolation(const std::vector<Ecef>& positions, double requested_time) {
+    // Find the position indices just before and after the requested time
+    size_t end_index = 0;
+    for (size_t i = 0; i < positions.size(); ++i) {
+        if (positions[i].get_time() <= requested_time) {
+            end_index = i;
+        } else {
+            break;
+        }
+    }
+
+    // Handle edge cases
+    if (end_index == positions.size() - 1) {
+        return positions[end_index]; // The requested time is after the last position
+    } else if (end_index == 0) {
+        return positions[0]; // The requested time is before the first position
+    }
+
+    const Ecef& startPos = positions[end_index];
+    const Ecef& endPos = positions[end_index + 1];
+
+    int start_time = startPos.get_time();
+    int end_time = endPos.get_time();
+    double timeDiff = end_time - start_time;
+
+    double weightStart = (end_time - requested_time) / timeDiff;
+    double weightEnd = (requested_time - start_time) / timeDiff;
+
+    double interpolatedX = weightStart * startPos.get_x() + weightEnd * endPos.get_x();
+    double interpolatedY = weightStart * startPos.get_y() + weightEnd * endPos.get_y();
+    double interpolatedZ = weightStart * startPos.get_z() + weightEnd * endPos.get_z();
+
+    return Ecef(requested_time, interpolatedX, interpolatedY, interpolatedZ);
+}
+
+/*
+std::vector<Ecef> Ecef::propagate(const std::vector<Ecef>& positions, double start_time, double end_time) {
+    std::vector<Ecef> propagatedPositions;
+
+    // Find the starting position index
+    size_t startIndex = 0;
+    for (size_t i = 0; i < positions.size(); ++i) {
+        if (positions[i].get_time() <= start_time) {
+            startIndex = i;
+        } else {
+            break;
+        }
+    }
+
+    // Propagate positions starting from the startIndex
+    double prevX = positions[startIndex].get_x();
+    double prevY = positions[startIndex].get_y();
+    double prevZ = positions[startIndex].get_z();
+
+    for (size_t i = startIndex + 1; i < positions.size(); ++i) {
+        const Ecef& currentPos = positions[i];
+        const Ecef& prevPos = positions[i - 1];
+
+        int deltaTime = currentPos.get_time() - prevPos.get_time();
+
+        // Calculate the velocity components
+        double velocityX = (currentPos.get_x() - prevPos.get_x()) / deltaTime;
+        double velocityY = (currentPos.get_y() - prevPos.get_y()) / deltaTime;
+        double velocityZ = (currentPos.get_z() - prevPos.get_z()) / deltaTime;
+
+        // Propagate the positions within the time interval
+        for (int t = prevPos.get_time() + 1; t <= currentPos.get_time() && t <= end_time; ++t) {
+            double dt = t - prevPos.get_time();
+
+            double propagatedX = prevX + dt * velocityX;
+            double propagatedY = prevY + dt * velocityY;
+            double propagatedZ = prevZ + dt * velocityZ;
+
+            propagatedPositions.emplace_back(t, propagatedX, propagatedY, propagatedZ);
+
+            prevX = propagatedX;
+            prevY = propagatedY;
+            prevZ = propagatedZ;
+        }
+
+        // Stop propagating if the end time is reached
+        if (currentPos.get_time() >= end_time) {
+            break;
+        }
+    }
+
+    return propagatedPositions;
+}
+*/
 
 EcefVector_T Ecef::interpolateECEFPoints(const Ecef& startPoint, const Ecef& endPoint, int numIntermediatePoints) {
     EcefVector_T intermediatePoints;

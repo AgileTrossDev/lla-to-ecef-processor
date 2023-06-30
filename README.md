@@ -12,12 +12,16 @@ Coding challenge to ingest LLA Coorindates, while converting them to ECEF, which
 - Calculate ECEF velocitgy at time points within the Data.
 - Interpolate ECEF velocity for any request time
 
-### Ingest CSV of LLA Coordinates
+## Execution Flow
+
+
+
+## Ingest CSV of LLA Coordinates
 Application will ingest a comma-separated value file containing LLA Coordinates containing the following collumns **Time**, **Latitude**, **Longitude**, **Atitude**.   Time is from the Unix Epoch in seconds, where the Latitude and Longitude coordinates are in degrees.  **The attitude in the CSV is represented in KM**
 
 
 
-### Convert LLA to ECEF
+## Convert LLA to ECEF
 
 X = ( N + h ) cos lat cos long
 Y = ( N + h ) cos lat sin long
@@ -29,7 +33,7 @@ N = Radius of curvature (meters)
 
 **NOTE** Conversion must also account for the Altitude input being in Kilometers.
 
-### Calculate ECEF velocitgy at time points within the Data.
+## Calculate ECEF velocitgy at time points within the Data.
 The expected baseline for calculating ECEF velocities is the discrete ∆Position/∆Time between consecutive points. The velocity at the first input point is defined as 0. 
 
 **NOTE** Velocity at times that don’t coincide with points in the input file should be calculated by linearly interpolating the velocities calculated for input points. If you are using a more complex method for calculating or interpolating velocity, please note how and why you

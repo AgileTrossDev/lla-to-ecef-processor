@@ -1,3 +1,6 @@
+#ifndef CSV_INGESTION_H
+#define CSV_INGESTION_H
+
 
 #include<iostream>
 #include<fstream>
@@ -33,3 +36,4 @@ std::vector<RecordType> ingest(std::string path_to_file) {
   }
   return results;
 };
+#endif

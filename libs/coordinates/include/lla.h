@@ -1,3 +1,6 @@
+#ifndef LLA_H
+#define LLA_H
+
 #include <string>
 #include <vector>
 
@@ -13,3 +16,5 @@ class Lla {
 };
 
 typedef std::vector<Lla> LlaVector_T;
+
+#endif
