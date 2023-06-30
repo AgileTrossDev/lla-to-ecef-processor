@@ -188,21 +188,7 @@ void calculate_velocity(vector<T>& positions) {
   }
 }
 
-// Interpolates velocity for a requested time
-// 
-// NOTE: Y = Y1 + (Y2 – Y1)/(X2 – X1) * (X * X1)
-//
-//   - Calculate the time difference between the two nearest velocity measurements.
-//     This will be used to determine the interpolation weight for each measurement.
-//
-//   - Calculate the interpolation weights for the two nearest velocity measurements
-//     based on the time difference. The weight for the earlier measurement should
-//     be proportional to the remaining time until the requested time, while the weight
-//     for the later measurement should be proportional to the elapsed time since
-//     the earlier measurement.
-//
-//   - Interpolate the velocities using the interpolation weights calculated in the previous step.
-//     This can be done by linearly interpolating the velocities component-wise (x, y, z) using the corresponding weights.
+// Find velocity for a requested time by finding interpolated position, and then caculate velocity
 template<typename T>
 T interpolate(const T& position_1, const T& position_2, double request_time) {
   
@@ -245,6 +231,7 @@ T interpolate(const T& position_1, const T& position_2, double request_time) {
 //  - Sort ECEF Records by Time Stamp
 //  - Find the time stamps we are using to interpolate
 //  - Calculate velocity across the vector 
+//  - Interpolate
 int main(int argc, char* argv[]) {
   
   // Validate execution Parameters

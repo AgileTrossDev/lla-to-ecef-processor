@@ -1,24 +1,31 @@
 # LLA-to-ECEF Conversion
-Coding challenge to ingest LLA Coorindates, while converting them to ECEF, which then can be used to evalute the velocity vector at two given times given in seconds from Unix Epoch.  Output should go to stdout. 
-
+Coding challenge to ingest LLA Coorindates, then converting them to ECEF, which then can be used to evalute the velocity vector at a requested time given in seconds from Unix Epoch.  Output should go to stdout. 
 
 ## Usage
+Execute: ./bin/app <request time> <path to input>
+ex: ./bin/app 1532334000 test/big_test_case.csv
+ex: ./bin/app 1532335268 test/big_test_case.csv
 
 ## Compilation
+make
 
 ## Features
 - Ingest CSV of LLA Coordinates
 - Convert LLA to ECEF
-- Calculate ECEF velocitgy at time points within the Data.
+- Calculate ECEF velocity at time points within the Data.
 - Interpolate ECEF velocity for any request time
 
 ## Execution Flow
-
-
+- Ingests the CSV file of LLA Data
+- Convert LLA to ECEF using WGS84_A and converting units as necessary (Radian/Degrees Meter/KM)
+- Sort ECEF Data
+- Calculate ECEF velocity for the ECEF Data collection.
+- Check to see if requested time is already in collection and if so, return the veclociy and exit.
+- Else we need to find the two ECEF records on either side of the requested time stamp for Interlopation  
+- Perform interpolation between the two points to calculate the ECEF velocity at the requested time
 
 ## Ingest CSV of LLA Coordinates
 Application will ingest a comma-separated value file containing LLA Coordinates containing the following collumns **Time**, **Latitude**, **Longitude**, **Atitude**.   Time is from the Unix Epoch in seconds, where the Latitude and Longitude coordinates are in degrees.  **The attitude in the CSV is represented in KM**
-
 
 
 ## Convert LLA to ECEF
@@ -40,28 +47,20 @@ The expected baseline for calculating ECEF velocities is the discrete ∆Positio
 
 ### Interpolate ECEF velocity for any request time
 
-
-
-
-
 ## Actions
 ### TODO
- - CMD Line Parameter with Path
- - Push to Github
-
+ - Propogate past end of input 
+ - More error checking of states
+ 
 ### Wish List
  - Dameonize
  - TCP Port ingestion
  - Dockerize
  - External Data Store
- - Conversion to Macator Projections
-
-
+ 
 ## References
  - Online Conversion Tool: https://www.convertecef.com/
  - Oh...there is wiki for that: https://en.wikipedia.org/wiki/Geographic_coordinate_conversion#From_geodetic_to_ECEF_coordinates
-
-
 
 ## Background
 ### Earth-Centered, Earth Fixed (ECEF)
@@ -72,44 +71,3 @@ The expected baseline for calculating ECEF velocities is the discrete ∆Positio
 
 ### Latitude, Longitude, Altitude (LLA)
   - Geodetic coordinates
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-int main () {
-
-  Results_Vector_T res = ingest("/home/sjackson/Development/project_x/test/big_test_case.csv");
-
-  cout <<"R: " << res.size() << endl;
-  res[0].disp();
-  int cnt = 0;
-  for (auto instance : res) {
-    cnt++;
-    //*itr.disp();
-    instance.disp();
-    
-  }
-cout << cnt;
-
-
-
-  return 0;
-
-};
-*/

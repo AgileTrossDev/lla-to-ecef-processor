@@ -1,3 +1,5 @@
+// Class representing Latitude, Longitude, and Attitude Geodetic Coordinates
+
 #include<sstream>
 #include<iostream>
 #include<iomanip>

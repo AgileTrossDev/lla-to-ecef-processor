@@ -1,5 +1,4 @@
-
-
+// Class representing Earth-Centered, Earth Fixed (ECEF) cordinates
 
 #include<sstream>
 #include<iostream>
@@ -94,133 +93,25 @@ Ecef Ecef::build_from_lla(double time, double latitude, double longitude, double
 }
 
 // Converts the input (Degrees) to Radians
+// TODO: Move to utils library.  Not specific to ECEF
 double Ecef::convert_degrees_to_radians(double input) {
   double DEGREES_TO_RADIANS = PI / 180.0;
   return input * DEGREES_TO_RADIANS;
 }
 
+// Calculates the velocity of Point 2, by using the location of Point 2
+// and the location of thhe previous point
 void Ecef::calculate_the_velocity(const Ecef& point1, Ecef& point2 ) {
 
   double time_difference = point2.get_time() - point1.get_time();
   
   point2.set_vx( (point2.get_x() - point1.get_x()) / time_difference);
   point2.set_vy((point2.get_y() - point1.get_y()) / time_difference);
-  point2.set_vz((point2.get_z() - point1.get_z()) / time_difference);
-
-  
+  point2.set_vz((point2.get_z() - point1.get_z()) / time_difference);  
 }
 
-// Perform linear interpolation leading up to the requested time from the previous point within positions
-Ecef Ecef::linear_interpolation(const std::vector<Ecef>& positions, double requested_time) {
-    // Find the position indices just before and after the requested time
-    size_t end_index = 0;
-    for (size_t i = 0; i < positions.size(); ++i) {
-        if (positions[i].get_time() <= requested_time) {
-            end_index = i;
-        } else {
-            break;
-        }
-    }
 
-    // Handle edge cases
-    if (end_index == positions.size() - 1) {
-        return positions[end_index]; // The requested time is after the last position
-    } else if (end_index == 0) {
-        return positions[0]; // The requested time is before the first position
-    }
-
-    const Ecef& startPos = positions[end_index];
-    const Ecef& endPos = positions[end_index + 1];
-
-    int start_time = startPos.get_time();
-    int end_time = endPos.get_time();
-    double timeDiff = end_time - start_time;
-
-    double weightStart = (end_time - requested_time) / timeDiff;
-    double weightEnd = (requested_time - start_time) / timeDiff;
-
-    double interpolatedX = weightStart * startPos.get_x() + weightEnd * endPos.get_x();
-    double interpolatedY = weightStart * startPos.get_y() + weightEnd * endPos.get_y();
-    double interpolatedZ = weightStart * startPos.get_z() + weightEnd * endPos.get_z();
-
-    return Ecef(requested_time, interpolatedX, interpolatedY, interpolatedZ);
-}
-
-/*
-std::vector<Ecef> Ecef::propagate(const std::vector<Ecef>& positions, double start_time, double end_time) {
-    std::vector<Ecef> propagatedPositions;
-
-    // Find the starting position index
-    size_t startIndex = 0;
-    for (size_t i = 0; i < positions.size(); ++i) {
-        if (positions[i].get_time() <= start_time) {
-            startIndex = i;
-        } else {
-            break;
-        }
-    }
-
-    // Propagate positions starting from the startIndex
-    double prevX = positions[startIndex].get_x();
-    double prevY = positions[startIndex].get_y();
-    double prevZ = positions[startIndex].get_z();
-
-    for (size_t i = startIndex + 1; i < positions.size(); ++i) {
-        const Ecef& currentPos = positions[i];
-        const Ecef& prevPos = positions[i - 1];
-
-        int deltaTime = currentPos.get_time() - prevPos.get_time();
-
-        // Calculate the velocity components
-        double velocityX = (currentPos.get_x() - prevPos.get_x()) / deltaTime;
-        double velocityY = (currentPos.get_y() - prevPos.get_y()) / deltaTime;
-        double velocityZ = (currentPos.get_z() - prevPos.get_z()) / deltaTime;
-
-        // Propagate the positions within the time interval
-        for (int t = prevPos.get_time() + 1; t <= currentPos.get_time() && t <= end_time; ++t) {
-            double dt = t - prevPos.get_time();
-
-            double propagatedX = prevX + dt * velocityX;
-            double propagatedY = prevY + dt * velocityY;
-            double propagatedZ = prevZ + dt * velocityZ;
-
-            propagatedPositions.emplace_back(t, propagatedX, propagatedY, propagatedZ);
-
-            prevX = propagatedX;
-            prevY = propagatedY;
-            prevZ = propagatedZ;
-        }
-
-        // Stop propagating if the end time is reached
-        if (currentPos.get_time() >= end_time) {
-            break;
-        }
-    }
-
-    return propagatedPositions;
-}
-*/
-
-EcefVector_T Ecef::interpolateECEFPoints(const Ecef& startPoint, const Ecef& endPoint, int numIntermediatePoints) {
-    EcefVector_T intermediatePoints;
-    
-    double stepSize = 1.0 / (numIntermediatePoints + 1); // +1 to account for start and end points
-    
-    for (int i = 1; i <= numIntermediatePoints; i++) {
-        double factor = i * stepSize;
-        
-        Ecef intermediatePoint(
-          startPoint.get_time(),
-          startPoint.get_x() + (endPoint.get_x() - startPoint.get_x()) * factor,
-          startPoint.get_y() + (endPoint.get_y() - startPoint.get_y()) * factor,
-          startPoint.get_z() + (endPoint.get_z() - startPoint.get_z()) * factor
-        );
-        intermediatePoints.push_back(intermediatePoint);
-    }
-    
-    return intermediatePoints;
-}
-
+// Calulcate Earth curvature at latitude using WGS84
 double Ecef::calculate_curvature_from_lat(double latitude) {
 
   double slatitude = sin(latitude);

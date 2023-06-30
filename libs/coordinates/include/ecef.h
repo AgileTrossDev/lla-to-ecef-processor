@@ -4,10 +4,6 @@
 #include <string>
 #include <vector>
 
-
-
-
-
 // Class representing Earth-Centered, Earth Fixed (ECEF) cordinates
 class Ecef {
 
@@ -17,12 +13,12 @@ class Ecef {
     static Ecef build_from_string(std::string line);
     static Ecef build_from_lla(double time, double latitude, double longitude, double altitude); 
 
-    // Class Level functions
+    // Class Level Static Functions
     static void calculate_the_velocity(const Ecef& point1, Ecef& point2 );
     static bool compare_by_time(const Ecef& a, const Ecef& b);
-    static Ecef linear_interpolation(const std::vector<Ecef>& positions, double requestedTime);    
-    std::vector<Ecef> interpolateECEFPoints(const Ecef& startPoint, const Ecef& endPoint, int numIntermediatePoints);
-
+       
+    // Constants
+    // TODO: Move to Constants file
     static const double PI;       // PI Value
     static const double WGS84_A;  // Semi-major axis 
     static const double WGS84_B;  // Semi-minor axis 
@@ -31,7 +27,6 @@ class Ecef {
     // Constructors
     Ecef() :time(-1), x(0), y(0), z(0),velocity_x(0),velocity_y(0), velocity_z(0) {};      
     Ecef(double _time, double _x, double _y, double _z) :time(_time), x(_x), y(_y), z(_z),velocity_x(0),velocity_y(0), velocity_z(0) {};      
-
 
     // Operations
     void disp(void) const; 
@@ -48,8 +43,6 @@ class Ecef {
     void  set_vx(double i) {velocity_x = i;}
     void  set_vy(double i) {velocity_y = i;}
     void  set_vz(double i) {velocity_z = i;}
-
-
 
   private:
 
