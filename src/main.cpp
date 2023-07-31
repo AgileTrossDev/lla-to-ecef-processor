@@ -165,12 +165,8 @@ T search_for_instance_by_request_time(const vector<T>& time_stamped_data, double
         // Object with the target timestamp found     
         return *it;
     } else {
-        cout << "Record for request time not found: " << request_time << endl;
-        // Object with the target timestamp not found
-        // You can return a default-constructed object or throw an exception,
-        // depending on your use case.
-        // Here, we'll return a default-constructed object.
-        return T(); // Assuming MyObject has a default constructor
+        cout << "Record for request time not found: " << request_time << endl;        
+        return T(); 
     }
 }
 
@@ -242,13 +238,14 @@ int main(int argc, char* argv[]) {
   }
 
   // Ingest the CSV File of LLA Data, converting it to ECEF parameters and then sort it
-  auto ecef_data = ingest<Ecef>(job_request.ingest_path);
+  auto ecef_data = ingest<Ecef>(job_request.ingest_path);   // TODO: Create Builder Function for ingest class that handles job_request
   sort(ecef_data.begin(), ecef_data.end(), Ecef::compare_by_time);
 
   // Calculate the Velocities across the entire data set
   calculate_velocity(ecef_data);
-  
+
   // Find the Timestamps we can use for Iterpolation
+  // TODO: Check if requested time is part of the dataset?
   job_request.interpolate_start = find_nearest_timestamp(ecef_data, job_request.request_time, true);
   job_request.interpolate_end = find_nearest_timestamp(ecef_data, job_request.request_time, false);
   job_request.disp();

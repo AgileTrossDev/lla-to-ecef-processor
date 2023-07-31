@@ -100,7 +100,7 @@ double Ecef::convert_degrees_to_radians(double input) {
 }
 
 // Calculates the velocity of Point 2, by using the location of Point 2
-// and the location of thhe previous point
+// and the location of the previous point
 void Ecef::calculate_the_velocity(const Ecef& point1, Ecef& point2 ) {
 
   double time_difference = point2.get_time() - point1.get_time();
